@@ -53,7 +53,7 @@ function login(){
 
 // 讀取 Google Sheet
 function loadData(){
-  const url = `https://docs.google.com/spreadsheets/d/${18X6PdqgF24x7_ueNIqCeh84fdaOhER-MMp8JyHGOcqE}/export?format=csv`;
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
 
   fetch(url)
     .then(r=>r.text())
