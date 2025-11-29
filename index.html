@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Iden Radar</title>
 <style>
 body{font-family:-apple-system,Roboto;margin:20px;}
@@ -11,7 +11,7 @@ body{font-family:-apple-system,Roboto;margin:20px;}
 .watch{background:#fff6cc;}
 .risk{background:#ffd6d6;}
 .hidden{display:none;}
-.center{text-align:center;margin-top:120px;}
+.center{text-align:center;margin-top:100px;}
 input,button{padding:8px;font-size:16px;}
 </style>
 </head>
@@ -33,57 +33,53 @@ input,button{padding:8px;font-size:16px;}
 </div>
 
 <script>
-
-// 密碼
 const PASS = "BAMBOO520";
-
-// Google Sheet ID（你要填這裡）
 const SHEET_ID = "18X6PdqgF24x7_ueNIqCeh84fdaOhER-MMp8JyHGOcqE";
 
-// 登入檢查
-function login(){
-  if(pw.value === PASS){
+function login() {
+  if (pw.value === PASS) {
     document.getElementById("login").classList.add("hidden");
     document.getElementById("app").classList.remove("hidden");
     loadData();
   } else {
-    alert("密碼錯誤");
+    alert("Wrong password");
   }
 }
 
-// 讀取 Google Sheet
-function loadData(){
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
+function loadData() {
+  const url = "https://docs.google.com/spreadsheets/d/" + SHEET_ID + "/export?format=csv";
 
   fetch(url)
-    .then(r=>r.text())
-    .then(t=>{
-      const rows = t.split("\n").map(r=>r.split(","));
-      const list = rows.slice(1).map(r=>({
-        code:r[0], zh:r[1], en:r[2],
-        price:parseFloat(r[5]),
-        sig:r[7], score:parseInt(r[8])
-      })).filter(x=>!isNaN(x.score))
-        .sort((a,b)=>b.score-a.score);
+    .then(r => r.text())
+    .then(t => {
+      const rows = t.split("\n").map(r => r.split(","));
+      const list = rows.slice(1).map(r => ({
+        code: r[0],
+        zh: r[1],
+        en: r[2],
+        price: parseFloat(r[5]),
+        sig: r[7],
+        score: parseInt(r[8])
+      }))
+      .filter(x => !isNaN(x.score))
+      .sort((a,b) => b.score - a.score);
 
-      show("buy",   list.filter(x=>x.sig==="BUY").slice(0,2),   "buy");
-      show("watch", list.filter(x=>x.sig==="WATCH").slice(0,2), "watch");
-      show("risk",  list.filter(x=>x.sig==="RISK").slice(0,1),  "risk");
+      show("buy", list.filter(x => x.sig === "BUY").slice(0,2), "buy");
+      show("watch", list.filter(x => x.sig === "WATCH").slice(0,2), "watch");
+      show("risk", list.filter(x => x.sig === "RISK").slice(0,1), "risk");
     });
 }
 
-// 顯示卡片
-function show(id, arr, cls){
+function show(id, arr, cls) {
   const box = document.getElementById(id);
   box.innerHTML = "";
-  arr.forEach(x=>{
-    box.innerHTML += `<div class="card ${cls}">
-      <b>${x.code} ${x.zh} / ${x.en}</b><br>
-      ${x.price}｜Score ${x.score}
-    </div>`;
+  arr.forEach(x => {
+    box.innerHTML += "<div class='card " + cls + "'>" +
+      "<b>" + x.code + " " + x.zh + " / " + x.en + "</b><br>" +
+      x.price + " ｜ Score " + x.score +
+      "</div>";
   });
 }
-
 </script>
 
 </body>
