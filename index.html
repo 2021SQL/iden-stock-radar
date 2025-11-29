@@ -5,23 +5,24 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Iden Radar</title>
 <style>
-body{font-family:-apple-system,Roboto;background:#fff;color:#000;margin:20px;}
-.card{padding:10px;margin:10px 0;border-radius:8px;}
+body{font-family:-apple-system,Roboto;margin:20px;}
+.card{margin:8px 0;padding:10px;border-radius:8px;}
 .buy{background:#d4ffd4;}
 .watch{background:#fff6cc;}
 .risk{background:#ffd6d6;}
 .hidden{display:none;}
+.center{text-align:center;margin-top:120px;}
 input,button{padding:8px;font-size:16px;}
-.center{text-align:center;margin-top:100px;}
 </style>
 </head>
 
 <body>
+
 <div id="login" class="center">
   <h2>Iden Stock Radar</h2>
   <p>Password:</p>
   <input id="pw" type="password">
-  <button onclick="check()">Enter</button>
+  <button onclick="login()">Enter</button>
 </div>
 
 <div id="app" class="hidden">
@@ -32,39 +33,57 @@ input,button{padding:8px;font-size:16px;}
 </div>
 
 <script>
-const PASS="BAMBOO520";
 
-function check(){
-  if(pw.value===PASS){login.style.display="none";app.style.display="block";load();}
-  else alert("Wrong password");
+// 密碼
+const PASS = "BAMBOO520";
+
+// Google Sheet ID（你要填這裡）
+const SHEET_ID = "18X6PdqgF24x7_ueNIqCeh84fdaOhER-MMp8JyHGOcqE";
+
+// 登入檢查
+function login(){
+  if(pw.value === PASS){
+    document.getElementById("login").classList.add("hidden");
+    document.getElementById("app").classList.remove("hidden");
+    loadData();
+  } else {
+    alert("密碼錯誤");
+  }
 }
 
-function load(){
-  const url="https://docs.google.com/spreadsheets/d/18X6PdqgF24x7_ueNIqCeh84fdaOhER-MMp8JyHGOcqE/export?format=csv";
-  fetch(url).then(r=>r.text()).then(t=>{
-    let rows=t.split("\n").map(x=>x.split(","));
-    let d=rows.slice(1).map(r=>({
-      code:r[0], zh:r[1], en:r[2],
-      price:parseFloat(r[5]), sig:r[7], score:parseInt(r[8])
-    })).filter(x=>!isNaN(x.score))
-      .sort((a,b)=>b.score-a.score);
+// 讀取 Google Sheet
+function loadData(){
+  const url = `https://docs.google.com/spreadsheets/d/${18X6PdqgF24x7_ueNIqCeh84fdaOhER-MMp8JyHGOcqE}/export?format=csv`;
 
-    show("buy", d.filter(x=>x.sig=="BUY").slice(0,2),"buy");
-    show("watch", d.filter(x=>x.sig=="WATCH").slice(0,2),"watch");
-    show("risk", d.filter(x=>x.sig=="RISK").slice(0,1),"risk");
+  fetch(url)
+    .then(r=>r.text())
+    .then(t=>{
+      const rows = t.split("\n").map(r=>r.split(","));
+      const list = rows.slice(1).map(r=>({
+        code:r[0], zh:r[1], en:r[2],
+        price:parseFloat(r[5]),
+        sig:r[7], score:parseInt(r[8])
+      })).filter(x=>!isNaN(x.score))
+        .sort((a,b)=>b.score-a.score);
+
+      show("buy",   list.filter(x=>x.sig==="BUY").slice(0,2),   "buy");
+      show("watch", list.filter(x=>x.sig==="WATCH").slice(0,2), "watch");
+      show("risk",  list.filter(x=>x.sig==="RISK").slice(0,1),  "risk");
+    });
+}
+
+// 顯示卡片
+function show(id, arr, cls){
+  const box = document.getElementById(id);
+  box.innerHTML = "";
+  arr.forEach(x=>{
+    box.innerHTML += `<div class="card ${cls}">
+      <b>${x.code} ${x.zh} / ${x.en}</b><br>
+      ${x.price}｜Score ${x.score}
+    </div>`;
   });
 }
 
-function show(id,list,cls){
-  let box=document.getElementById(id);
-  box.innerHTML="";
-  list.forEach(x=>{
-    box.innerHTML+=`<div class="card ${cls}">
-    <b>${x.code} ${x.zh} / ${x.en}</b><br>
-    ${x.price} ｜ Score: ${x.score}
-    </div>;
-  });
-}
 </script>
 
 </body>
