@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Iden Radar</title>
+<style>
+body{font-family:-apple-system,Roboto;background:#fff;color:#000;margin:20px;}
+.card{padding:10px;margin:10px 0;border-radius:8px;}
+.buy{background:#d4ffd4;}
+.watch{background:#fff6cc;}
+.risk{background:#ffd6d6;}
+.hidden{display:none;}
+input,button{padding:8px;font-size:16px;}
+.center{text-align:center;margin-top:100px;}
+</style>
+</head>
+
+<body>
+<div id="login" class="center">
+  <h2>Iden Stock Radar</h2>
+  <p>Password:</p>
+  <input id="pw" type="password">
+  <button onclick="check()">Enter</button>
+</div>
+
+<div id="app" class="hidden">
+  <h2>Iden Stock Radar</h2>
+  <h3>BUY</h3><div id="buy"></div>
+  <h3>WATCH</h3><div id="watch"></div>
+  <h3>RISK</h3><div id="risk"></div>
+</div>
+
+<script>
+const PASS="BAMBOO520";
+
+function check(){
+  if(pw.value===PASS){login.style.display="none";app.style.display="block";load();}
+  else alert("Wrong password");
+}
+
+function load(){
+  const url="https://docs.google.com/spreadsheets/d/18X6PdqgF24x7_ueNIqCeh84fdaOhER-MMp8JyHGOcqE/export?format=csv";
+  fetch(url).then(r=>r.text()).then(t=>{
+    let rows=t.split("\n").map(x=>x.split(","));
+    let d=rows.slice(1).map(r=>({
+      code:r[0], zh:r[1], en:r[2],
+      price:parseFloat(r[5]), sig:r[7], score:parseInt(r[8])
+    })).filter(x=>!isNaN(x.score))
+      .sort((a,b)=>b.score-a.score);
+
+    show("buy", d.filter(x=>x.sig=="BUY").slice(0,2),"buy");
+    show("watch", d.filter(x=>x.sig=="WATCH").slice(0,2),"watch");
+    show("risk", d.filter(x=>x.sig=="RISK").slice(0,1),"risk");
+  });
+}
+
+function show(id,list,cls){
+  let box=document.getElementById(id);
+  box.innerHTML="";
+  list.forEach(x=>{
+    box.innerHTML+=`<div class="card ${cls}">
+    <b>${x.code} ${x.zh} / ${x.en}</b><br>
+    ${x.price} ｜ Score: ${x.score}
+    </div>;
+  });
+}
+</script>
+
+</body>
+</html>
